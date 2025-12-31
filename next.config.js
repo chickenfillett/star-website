@@ -13,8 +13,9 @@ const nextConfig = {
   trailingSlash: false,
   poweredByHeader: false,
   // 修复警告：多 lockfiles 和跨域请求
-  outputFileTracingRoot: 'C:/Users/lxl20/Desktop/web star test/star-website',
-  allowedDevOrigins: ['http://192.168.1.9', 'http://localhost'],
+  experimental: {
+    allowedDevOrigins: ['http://192.168.1.9', 'http://localhost'],
+  },
 }
 
 module.exports = nextConfig
