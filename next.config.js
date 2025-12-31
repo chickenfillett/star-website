@@ -13,9 +13,7 @@ const nextConfig = {
   trailingSlash: false,
   poweredByHeader: false,
   // 修复警告：多 lockfiles 和跨域请求
-  experimental: {
-    allowedDevOrigins: ['http://192.168.1.9', 'http://localhost'],
-  },
+  // allowedDevOrigins 在 Next.js 15 中已被移除，无需配置
 }
 
 module.exports = nextConfig
