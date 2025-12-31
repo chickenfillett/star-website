@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output:'standalone'，
+  output: 'standalone',
   images: {
     domains: [],
     formats: ['image/avif', 'image/webp'],
@@ -10,19 +10,11 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
   compress: true,
-  // 忽略private目录，解决构建错误
-  webpack: (config, { isServer }) => {
-    config.module.rules.push({
-      test: /\.(js|jsx|ts|tsx)$/,
-      include: /app\/private/,
-      use: {
-        loader: 'ignore-loader'
-      }
-    });
-    return config;
-  },
-  // 忽略private目录的页面路由
-  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  trailingSlash: false,
+  poweredByHeader: false,
+  // 修复警告：多 lockfiles 和跨域请求
+  outputFileTracingRoot: 'C:/Users/lxl20/Desktop/web star test/star-website',
+  allowedDevOrigins: ['http://192.168.1.9', 'http://localhost'],
 }
 
 module.exports = nextConfig
