@@ -12,6 +12,9 @@ interface AudioState {
   isPlaying: boolean;
   currentTrackIndex: number;
   tracks: string[];
+  setAudio: (audio: HTMLAudioElement | null) => void;
+  setIsPlaying: (isPlaying: boolean) => void;
+  setCurrentTrackIndex: (index: number) => void;
   toggleAudio: () => Promise<void>;
   playNextTrack: () => void;
   initializeAudio: () => void;
@@ -93,4 +96,13 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     
     set({ currentTrackIndex: nextIndex });
   },
+
+  // 设置音频对象
+  setAudio: (audio) => set({ audio }),
+
+  // 设置播放状态
+  setIsPlaying: (isPlaying) => set({ isPlaying }),
+
+  // 设置当前轨道索引
+  setCurrentTrackIndex: (currentTrackIndex) => set({ currentTrackIndex }),
 }));

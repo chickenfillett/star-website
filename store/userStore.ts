@@ -7,6 +7,20 @@
 
 import { create } from 'zustand';
 
+export interface UserInteraction {
+  type: 'like' | 'view' | 'share';
+  contentId: string;
+  contentType: 'photo' | 'article';
+  timestamp: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  name: string;
+  unlockedAt: string;
+  icon: string;
+}
+
 interface UserState {
   isAuthenticated: boolean;
   visitCount: number;
@@ -14,8 +28,9 @@ interface UserState {
   lastVisitDate: string | null;
   likedPhotos: Set<string>;
   likedArticles: Set<string>;
+  interactions: UserInteraction[];
+  achievements: UserAchievement[];
   visitorNumber: number;
-  achievements: string[];
   
   authenticate: (password: string) => Promise<boolean>;
   logout: () => void;
@@ -23,10 +38,11 @@ interface UserState {
   updateConsecutiveDays: () => void;
   togglePhotoLike: (photoId: string) => void;
   toggleArticleLike: (articleId: string) => void;
+  addInteraction: (interaction: UserInteraction) => void;
+  unlockAchievement: (achievement: UserAchievement) => void;
   setVisitorNumber: (number: number) => void;
   isPhotoLiked: (photoId: string) => boolean;
   isArticleLiked: (articleId: string) => boolean;
-  unlockAchievement: (id: string) => void;
 }
 
 export const useUserStore = create<UserState>()((set, get) => ({
@@ -36,8 +52,9 @@ export const useUserStore = create<UserState>()((set, get) => ({
   lastVisitDate: null,
   likedPhotos: new Set(),
   likedArticles: new Set(),
-  visitorNumber: 0,
+  interactions: [],
   achievements: [],
+  visitorNumber: 0,
   
   authenticate: async (password: string) => {
     const isValid = password === '123456';
@@ -101,6 +118,21 @@ export const useUserStore = create<UserState>()((set, get) => ({
     });
   },
   
+  addInteraction: (interaction: UserInteraction) => {
+    set((state) => ({ 
+      interactions: [...state.interactions, interaction] 
+    }));
+  },
+  
+  unlockAchievement: (achievement: UserAchievement) => {
+    set((state) => {
+      if (state.achievements.find((a) => a.id === achievement.id)) {
+        return {};
+      }
+      return { achievements: [...state.achievements, achievement] };
+    });
+  },
+  
   setVisitorNumber: (number: number) => {
     set({ visitorNumber: number });
   },
@@ -111,12 +143,6 @@ export const useUserStore = create<UserState>()((set, get) => ({
   
   isArticleLiked: (articleId: string) => {
     return get().likedArticles.has(articleId);
-  },
-  
-  unlockAchievement: (id: string) => {
-    set((state) => ({
-      achievements: [...state.achievements, id]
-    }));
   },
 }));
 

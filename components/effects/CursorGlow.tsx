@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { throttle } from '@/utils/helpers';
 
 interface CursorGlowProps {
   className?: string;
@@ -12,34 +13,27 @@ export default function CursorGlow({ className = '' }: CursorGlowProps) {
   const [isHovering, setIsHovering] = useState(false);
   const glowRef = useRef<HTMLDivElement>(null);
 
+  const throttledMouseMove = useCallback(
+    throttle((e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    }, 16),
+    []
+  );
+
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(() => {
-        setMousePosition({ x: e.clientX, y: e.clientY });
-      }, 16);
-    };
-
     const handleMouseEnter = () => setIsHovering(true);
     const handleMouseLeave = () => setIsHovering(false);
 
-    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mousemove', throttledMouseMove);
     document.addEventListener('mouseenter', handleMouseEnter);
     document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mousemove', throttledMouseMove);
       document.removeEventListener('mouseenter', handleMouseEnter);
       document.removeEventListener('mouseleave', handleMouseLeave);
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
     };
-  }, [setMousePosition]);
+  }, [throttledMouseMove]);
 
   return (
     <>

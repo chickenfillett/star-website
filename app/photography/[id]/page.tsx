@@ -11,12 +11,13 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, StarIcon, ChevronUpIcon, ChevronDownIcon } from '@/components/ui/Icons';
+import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, StarIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/ui/Icons';
 import { useContentStore } from '@/store/contentStore';
 import { useUserStore } from '@/store/userStore';
 import { useAudioStore } from '@/store/audioStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useEasterEggs } from '@/hooks/useEasterEggs';
+import { formatDateTime } from '@/utils/format';
 
 export default function PhotoDetailPage() {
   const params = useParams();
@@ -59,7 +60,7 @@ export default function PhotoDetailPage() {
       handlePhotoDetailLeave();
       clearInterval(interval);
     };
-  }, [params.id, photos, handlePhotoDetailEnter, handlePhotoDetailLeave, checkPhotoDetailEasterEgg]);
+  }, [params.id]);
 
   const photo = photos[currentIndex];
 
@@ -93,7 +94,7 @@ export default function PhotoDetailPage() {
     setScale(Math.max(1, Math.min(3, newScale)));
   };
 
-  const handleMouseDown = () => {
+  const handleMouseDown = (e: React.MouseEvent) => {
     if (scale > 1) {
       setIsDragging(true);
     }

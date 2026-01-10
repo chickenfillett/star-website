@@ -14,8 +14,9 @@ export const ANIMATION = {
     pageLoad: 2.5,
     starTwinkle: 3,
     shootingStar: 1,
+    shimmer: 10,
   },
-
+  
   easing: {
     easeInOut: 'ease-in-out',
     easeOut: 'ease-out',
@@ -23,7 +24,7 @@ export const ANIMATION = {
     linear: 'linear',
     spring: [0.4, 0, 0.2, 1],
   },
-
+  
   spring: {
     soft: { type: 'spring', stiffness: 200, damping: 25 },
     medium: { type: 'spring', stiffness: 300, damping: 25 },
@@ -31,25 +32,25 @@ export const ANIMATION = {
     bouncy: { type: 'spring', stiffness: 500, damping: 15 },
     gentle: { type: 'spring', stiffness: 150, damping: 30 },
   },
-
+  
   scale: {
     hover: 1.05,
     click: 0.96,
     tap: 0.92,
   },
-
+  
   opacity: {
     hidden: 0,
     visible: 1,
     low: 0.3,
     medium: 0.6,
   },
-
+  
   frameRate: {
     standard: 60,
     high: 120,
   },
-
+  
   transition: {
     fast: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     normal: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',

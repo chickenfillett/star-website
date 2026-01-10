@@ -10,20 +10,33 @@ import { create } from 'zustand';
 interface UIState {
   isMobile: boolean;
   language: 'zh' | 'en';
+  isMenuOpen: boolean;
   scrollY: number;
+  isSearchOpen: boolean;
   setMobile: (isMobile: boolean) => void;
   setLanguage: (language: 'zh' | 'en') => void;
+  setMenuOpen: (isOpen: boolean) => void;
   setScrollY: (scrollY: number) => void;
+  setSearchOpen: (isOpen: boolean) => void;
+  toggleMenu: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
   isMobile: false,
   language: 'zh',
+  isMenuOpen: false,
   scrollY: 0,
+  isSearchOpen: false,
   
   setMobile: (isMobile) => set({ isMobile }),
   
   setLanguage: (language) => set({ language }),
   
+  setMenuOpen: (isOpen) => set({ isMenuOpen: isOpen }),
+  
   setScrollY: (scrollY) => set({ scrollY }),
+  
+  setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),
+  
+  toggleMenu: () => set((state) => ({ isMenuOpen: !state.isMenuOpen })),
 }));

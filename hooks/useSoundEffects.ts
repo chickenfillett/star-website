@@ -17,12 +17,56 @@ export function useSoundEffects() {
     soundManager.play('pageLoad');
   }, []);
 
+  const playEasterEggSound = useCallback(() => {
+    soundManager.play('easterEgg');
+  }, []);
+
+  const playAudioControlSound = useCallback(() => {
+    soundManager.play('audioControl');
+  }, []);
+
+  const playContentInteractionSound = useCallback(() => {
+    soundManager.play('contentInteraction');
+  }, []);
+
   const playPermissionUnlockSound = useCallback(() => {
     soundManager.play('permissionUnlock');
   }, []);
 
   const playHoverSound = useCallback(() => {
     soundManager.play('hover');
+  }, []);
+
+  const playScrollSound = useCallback(() => {
+    soundManager.play('scroll');
+  }, []);
+
+  const playNotificationSound = useCallback(() => {
+    soundManager.play('notification');
+  }, []);
+
+  const playSuccessSound = useCallback(() => {
+    soundManager.play('success');
+  }, []);
+
+  const playErrorSound = useCallback(() => {
+    soundManager.play('error');
+  }, []);
+
+  const playTypingSound = useCallback(() => {
+    soundManager.play('typing');
+  }, []);
+
+  const initializeAudio = useCallback(() => {
+    soundManager.initialize();
+  }, []);
+
+  const setVolume = useCallback((volume: number) => {
+    soundManager.setVolume(volume);
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    soundManager.toggleMute();
   }, []);
 
   const getVolume = useCallback(() => {
@@ -33,22 +77,24 @@ export function useSoundEffects() {
     return soundManager.getIsMuted();
   }, []);
 
-  const toggleMute = useCallback(() => {
-    soundManager.toggleMute();
-  }, []);
-
-  const setVolume = useCallback((volume: number) => {
-    soundManager.setVolume(volume);
-  }, []);
-
   return {
     playButtonSound,
     playPageLoadSound,
+    playEasterEggSound,
+    playAudioControlSound,
+    playContentInteractionSound,
     playPermissionUnlockSound,
     playHoverSound,
+    playScrollSound,
+    playNotificationSound,
+    playSuccessSound,
+    playErrorSound,
+    playTypingSound,
+    initializeAudio,
+    setVolume,
+    toggleMute,
     getVolume,
     getIsMuted,
-    toggleMute,
-    setVolume,
+    isNightTime: () => soundManager.isNightTime(),
   };
 }

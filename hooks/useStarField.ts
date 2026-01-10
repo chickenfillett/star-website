@@ -1,15 +1,13 @@
 /**
- * 星空背景组件
- * 核心作用：渲染纯黑背景和星空特效
+ * 星空背景Hook
+ * 核心作用：管理星空背景的渲染和动画
  * 关联界面/功能模块：全局布局
  * 依赖文件/接口：constants/animation.ts
  */
 
-'use client';
-
-import { useRef } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { STAR_ANIMATION } from '@/constants/animation';
+import { throttle } from '@/utils/helpers';
 
 interface Star {
   id: number;
@@ -25,25 +23,19 @@ interface ShootingStar {
   x: number;
   y: number;
   angle: number;
-  length: number;
-  speed: number;
-  opacity: number;
 }
 
-export default function StarField() {
+export function useStarField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stars, setStars] = useState<Star[]>([]);
+  const [shootingStars, setShootingStars] = useState<ShootingStar[]>([]);
 
   useEffect(() => {
-    const canvas = document.createElement('canvas');
-    canvas.className = 'fixed inset-0 w-full h-full pointer-events-none';
-    canvas.style.zIndex = '-1';
-    document.body.appendChild(canvas);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    const stars: Star[] = [];
-    const shootingStars: ShootingStar[] = [];
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -52,11 +44,11 @@ export default function StarField() {
     };
 
     const generateStars = () => {
-      stars.length = 0;
+      const newStars: Star[] = [];
       const starCount = STAR_ANIMATION.particleCount.static;
 
       for (let i = 0; i < starCount; i++) {
-        stars.push({
+        newStars.push({
           id: i,
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -65,35 +57,30 @@ export default function StarField() {
           twinkleDelay: Math.random() * STAR_ANIMATION.twinkleInterval.max,
         });
       }
+
+      setStars(newStars);
     };
 
     const createShootingStar = () => {
-      const shootingStar: ShootingStar = {
+      const newShootingStar: ShootingStar = {
         id: Date.now(),
-        x: Math.random() * canvas.width * 0.8,
-        y: Math.random() * canvas.height * 0.5,
+        x: Math.random() * canvas.width,
+        y: Math.random() * (canvas.height / 2),
         angle: Math.PI / 4 + (Math.random() - 0.5) * 1.2,
-        length: STAR_ANIMATION.shootingStar.trailLength,
-        speed: STAR_ANIMATION.shootingStar.speed * 2,
-        opacity: 1,
       };
 
-      shootingStars.push(shootingStar);
-    };
-
-    const updateShootingStars = () => {
-      for (let i = shootingStars.length - 1; i >= 0; i--) {
-        const star = shootingStars[i];
-        
-        star.x += Math.cos(star.angle) * star.speed;
-        star.y += Math.sin(star.angle) * star.speed;
-        star.length -= star.speed;
-        star.opacity -= 0.015;
-
-        if (star.length <= 0 || star.opacity <= 0) {
-          shootingStars.splice(i, 1);
+      setShootingStars((prev) => {
+        const current = [...prev, newShootingStar];
+        if (current.length > STAR_ANIMATION.shootingStar.maxConcurrent) {
+          return current.slice(-STAR_ANIMATION.shootingStar.maxConcurrent);
         }
-      }
+        return current;
+      });
+
+      const duration = STAR_ANIMATION.shootingStar.trailLength / STAR_ANIMATION.shootingStar.speed * 1000;
+      setTimeout(() => {
+        setShootingStars((prev) => prev.filter((s) => s.id !== newShootingStar.id));
+      }, duration);
     };
 
     const scheduleShootingStar = () => {
@@ -123,8 +110,9 @@ export default function StarField() {
       });
 
       shootingStars.forEach((shootingStar) => {
-        const endX = shootingStar.x + Math.cos(shootingStar.angle) * shootingStar.length;
-        const endY = shootingStar.y + Math.sin(shootingStar.angle) * shootingStar.length;
+        const length = STAR_ANIMATION.shootingStar.trailLength;
+        const endX = shootingStar.x + Math.cos(shootingStar.angle) * length;
+        const endY = shootingStar.y + Math.sin(shootingStar.angle) * length;
 
         const gradient = ctx.createLinearGradient(
           shootingStar.x,
@@ -132,27 +120,19 @@ export default function StarField() {
           endX,
           endY
         );
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${shootingStar.opacity})`);
-        gradient.addColorStop(0.2, `rgba(255, 255, 255, ${shootingStar.opacity * 0.8})`);
-        gradient.addColorStop(0.5, `rgba(255, 255, 255, ${shootingStar.opacity * 0.5})`);
-        gradient.addColorStop(0.8, `rgba(255, 255, 255, ${shootingStar.opacity * 0.2})`);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+        gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.6)');
+        gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.3)');
         gradient.addColorStop(1, 'transparent');
 
         ctx.beginPath();
         ctx.moveTo(shootingStar.x, shootingStar.y);
         ctx.lineTo(endX, endY);
         ctx.strokeStyle = gradient;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(shootingStar.x, shootingStar.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${shootingStar.opacity})`;
-        ctx.fill();
       });
-
-      updateShootingStars();
 
       requestAnimationFrame(animate);
     };
@@ -164,9 +144,8 @@ export default function StarField() {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      document.body.removeChild(canvas);
     };
   }, []);
 
-  return null;
+  return { canvasRef, stars, shootingStars };
 }

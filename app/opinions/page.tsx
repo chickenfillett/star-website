@@ -7,39 +7,19 @@
 
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { SearchIcon, ClockIcon, FlameIcon } from '@/components/ui/Icons';
 import { useContentStore } from '@/store/contentStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { formatRelativeTime } from '@/utils/format';
+import { formatRelativeTime, formatNumber } from '@/utils/format';
 
 export default function OpinionsPage() {
   const { articles, sortBy, setSortBy, setArticles } = useContentStore();
   const { playButtonSound } = useSoundEffects();
   const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredArticles = useMemo(() => {
-    let result = [...articles];
-
-    if (searchQuery) {
-      result = result.filter(
-        (article) =>
-          article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          article.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          article.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-    }
-
-    if (sortBy === 'time') {
-      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else if (sortBy === 'popularity') {
-      result.sort((a, b) => b.likes - a.likes);
-    }
-
-    return result;
-  }, [searchQuery, sortBy, articles]);
+  const [filteredArticles, setFilteredArticles] = useState(articles);
 
   useEffect(() => {
     const mockArticles = [
@@ -57,6 +37,27 @@ export default function OpinionsPage() {
 
     setArticles(mockArticles);
   }, [setArticles]);
+
+  useEffect(() => {
+    let result = [...articles];
+
+    if (searchQuery) {
+      result = result.filter(
+        (article) =>
+          article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          article.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          article.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    if (sortBy === 'time') {
+      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortBy === 'popularity') {
+      result.sort((a, b) => b.likes - a.likes);
+    }
+
+    setFilteredArticles(result);
+  }, [searchQuery, sortBy, articles]);
 
   return (
     <div className="min-h-screen pt-20 sm:pt-24 pb-20">
@@ -136,9 +137,9 @@ export default function OpinionsPage() {
                   <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-white/40 flex-wrap">
                     <span>{formatRelativeTime(article.createdAt)}</span>
                     <span>•</span>
-                    <span>{article.views} 阅读</span>
+                    <span>{formatNumber(article.views)} 阅读</span>
                     <span>•</span>
-                    <span>{article.likes} 点赞</span>
+                    <span>{formatNumber(article.likes)} 点赞</span>
                   </div>
 
                   <div className="flex gap-2 mt-3 sm:mt-4 flex-wrap">

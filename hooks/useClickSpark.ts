@@ -1,6 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import { CLICK_SPARK } from '@/constants/animation';
-import { Particle } from '@/types';
+
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  angle: number;
+  distance: number;
+  size: number;
+  color: string;
+  delay: number;
+  shape: 'circle' | 'star' | 'diamond';
+  rotation: number;
+}
 
 export function useClickSpark() {
   const [particles, setParticles] = useState<Particle[]>([]);
