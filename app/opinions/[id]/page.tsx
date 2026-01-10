@@ -16,6 +16,7 @@ import { useContentStore } from '@/store/contentStore';
 import { useUserStore } from '@/store/userStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useEasterEggs } from '@/hooks/useEasterEggs';
+import { formatDateTime } from '@/utils/format';
 
 export default function ArticleDetailPage() {
   const params = useParams();
