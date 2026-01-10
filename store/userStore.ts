@@ -15,6 +15,7 @@ interface UserState {
   likedPhotos: Set<string>;
   likedArticles: Set<string>;
   visitorNumber: number;
+  achievements: string[];
   
   authenticate: (password: string) => Promise<boolean>;
   logout: () => void;
@@ -25,6 +26,7 @@ interface UserState {
   setVisitorNumber: (number: number) => void;
   isPhotoLiked: (photoId: string) => boolean;
   isArticleLiked: (articleId: string) => boolean;
+  unlockAchievement: (id: string) => void;
 }
 
 export const useUserStore = create<UserState>()((set, get) => ({
@@ -35,6 +37,7 @@ export const useUserStore = create<UserState>()((set, get) => ({
   likedPhotos: new Set(),
   likedArticles: new Set(),
   visitorNumber: 0,
+  achievements: [],
   
   authenticate: async (password: string) => {
     const isValid = password === '123456';
@@ -108,6 +111,12 @@ export const useUserStore = create<UserState>()((set, get) => ({
   
   isArticleLiked: (articleId: string) => {
     return get().likedArticles.has(articleId);
+  },
+  
+  unlockAchievement: (id: string) => {
+    set((state) => ({
+      achievements: [...state.achievements, id]
+    }));
   },
 }));
 
