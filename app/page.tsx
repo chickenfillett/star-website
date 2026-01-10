@@ -11,14 +11,9 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { StarIcon, CameraIcon, UserIcon } from '@/components/ui/Icons';
-import { useContentStore } from '@/store/contentStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { formatRelativeTime } from '@/utils/format';
-import { useUIStore } from '@/store/uiStore';
 
 export default function HomePage() {
-  const { articles, setArticles } = useContentStore();
-  const { scrollY, setScrollY } = useUIStore();
   const { playButtonSound, playPageLoadSound } = useSoundEffects();
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
@@ -39,46 +34,19 @@ export default function HomePage() {
     updateDate();
     const interval = setInterval(updateDate, 1000);
 
-    const mockArticles = [
-      {
-        id: '1',
-        title: '关于极简设计的思考',
-        summary: '极简主义不仅仅是视觉上的简约，更是一种生活态度...',
-        content: '',
-        tags: ['设计', '思考'],
-        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-        views: 120,
-        likes: 45,
-      },
-      {
-        id: '2',
-        title: '星空摄影技巧分享',
-        summary: '如何拍摄出令人惊叹的星空照片？这里有一些实用技巧...',
-        content: '',
-        tags: ['摄影', '技巧'],
-        createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
-        views: 89,
-        likes: 32,
-      },
-    ];
-
-    setArticles(mockArticles);
-
     return () => {
       clearInterval(interval);
     };
-  }, [setArticles, playPageLoadSound]);
+  }, [playPageLoadSound]);
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setScrollY(currentScrollY);
-      setShowBackToTop(currentScrollY > window.innerHeight);
+      setShowBackToTop(window.scrollY > window.innerHeight);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [setScrollY]);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -11,12 +11,12 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, StarIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/ui/Icons';
+import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, StarIcon, ChevronUpIcon, ChevronDownIcon } from '@/components/ui/Icons';
 import { useContentStore } from '@/store/contentStore';
 import { useUserStore } from '@/store/userStore';
+import { useAudioStore } from '@/store/audioStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useEasterEggs } from '@/hooks/useEasterEggs';
-import { formatDateTime } from '@/utils/format';
 
 export default function PhotoDetailPage() {
   const params = useParams();
@@ -25,6 +25,14 @@ export default function PhotoDetailPage() {
   const { togglePhotoLike, isPhotoLiked } = useUserStore();
   const { playButtonSound, playPermissionUnlockSound } = useSoundEffects();
   const { handlePhotoDetailEnter, handlePhotoDetailLeave, checkPhotoDetailEasterEgg, handleLike: handleEasterEggLike } = useEasterEggs();
+  // 使用全局音频状态管理
+  const { isPlaying, toggleAudio } = useAudioStore();
+  
+  // 包装toggleAudio函数，添加按钮音效
+  const handleToggleAudio = () => {
+    toggleAudio();
+    playButtonSound();
+  };
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scale, setScale] = useState(1);
@@ -51,7 +59,7 @@ export default function PhotoDetailPage() {
       handlePhotoDetailLeave();
       clearInterval(interval);
     };
-  }, [params.id]);
+  }, [params.id, photos, handlePhotoDetailEnter, handlePhotoDetailLeave, checkPhotoDetailEasterEgg]);
 
   const photo = photos[currentIndex];
 
@@ -85,7 +93,7 @@ export default function PhotoDetailPage() {
     setScale(Math.max(1, Math.min(3, newScale)));
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = () => {
     if (scale > 1) {
       setIsDragging(true);
     }
@@ -151,6 +159,31 @@ export default function PhotoDetailPage() {
             >
               <ChevronRightIcon className="w-6 h-6" />
             </button>
+            {/* 音频控制按钮 */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleToggleAudio}
+              className="p-2 bg-black/95 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center shadow-lg hover:border-white/30 transition-colors"
+              aria-label={isPlaying ? "暂停音乐" : "播放音乐"}
+            >
+              {isPlaying ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-white/70">
+                  {/* 简约音符 */}
+                  <path d="M12 4v16" strokeWidth="1.5" />
+                  <path d="M16 6v12" strokeWidth="1.5" />
+                  <path d="M8 8v8" strokeWidth="1.5" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-white/70">
+                  {/* 简约音符 + 斜杠 */}
+                  <path d="M12 4v16" strokeWidth="1.5" />
+                  <path d="M16 6v12" strokeWidth="1.5" />
+                  <path d="M8 8v8" strokeWidth="1.5" />
+                  <path d="M2 2l20 20" />
+                </svg>
+              )}
+            </motion.button>
           </div>
         </div>
       </nav>

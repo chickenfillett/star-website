@@ -3,19 +3,6 @@
 import { motion } from 'framer-motion';
 import { useClickSpark } from '@/hooks/useClickSpark';
 
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  angle: number;
-  distance: number;
-  size: number;
-  color: string;
-  delay: number;
-  shape: 'circle' | 'star' | 'diamond';
-  rotation: number;
-}
-
 export default function ClickSparkEffect() {
   const { particles } = useClickSpark();
 

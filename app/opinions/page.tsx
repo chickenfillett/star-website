@@ -7,38 +7,20 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { SearchIcon, ClockIcon, FlameIcon } from '@/components/ui/Icons';
 import { useContentStore } from '@/store/contentStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { formatRelativeTime, formatNumber } from '@/utils/format';
+import { formatRelativeTime } from '@/utils/format';
 
 export default function OpinionsPage() {
   const { articles, sortBy, setSortBy, setArticles } = useContentStore();
   const { playButtonSound } = useSoundEffects();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredArticles, setFilteredArticles] = useState(articles);
 
-  useEffect(() => {
-    const mockArticles = [
-      {
-        id: '1',
-        title: '想说的话',
-        summary: '一个多月前，我对编程——尤其是网页前端设计还一窍不通。那时，我只会用豆包生成一些简单的、能在浏览器中直接打开的 HTML 文件。经过这段时间的学习，我已经能够创建需要安装依赖、具备交互功能的真正网页。从对 AI 开发一知半解，到了解并开始学习 Trae 和 Kiro，我从曾经完全不懂 HTML、CSS 和 JS，到如今能借助人工智能工具快速学习，并一步步实现自己长久以来的愿望。虽然这个网页还不完善，AI 也时常需要人工干预，如由于出现错误，需要重新清除 npm 缓存并再次运行 npm install，但这些过程本身也让我对前端设计有了更深的理解。每一次调试、每一次尝试，都让我真切地感受到：未来正在到来。',
-        content: '一个多月前，我对编程——尤其是网页前端设计还一窍不通。那时，我只会用豆包生成一些简单的、能在浏览器中直接打开的 HTML 文件。经过这段时间的学习，我已经能够创建需要安装依赖、具备交互功能的真正网页。从对 AI 开发一知半解，到了解并开始学习 Trae 和 Kiro，我从曾经完全不懂 HTML、CSS 和 JS，到如今能借助人工智能工具快速学习，并一步步实现自己长久以来的愿望。虽然这个网页还不完善，AI 也时常需要人工干预，如由于出现错误，需要重新清除 npm 缓存并再次运行 npm install，但这些过程本身也让我对前端设计有了更深的理解。每一次调试、每一次尝试，都让我真切地感受到：未来正在到来。',
-        tags: ['个人感悟', '编程学习', 'AI开发', '前端设计'],
-        createdAt: new Date().toISOString(),
-        views: 0,
-        likes: 0,
-      },
-    ];
-
-    setArticles(mockArticles);
-  }, [setArticles]);
-
-  useEffect(() => {
+  const filteredArticles = useMemo(() => {
     let result = [...articles];
 
     if (searchQuery) {
@@ -56,8 +38,25 @@ export default function OpinionsPage() {
       result.sort((a, b) => b.likes - a.likes);
     }
 
-    setFilteredArticles(result);
+    return result;
   }, [searchQuery, sortBy, articles]);
+
+  useEffect(() => {
+    const mockArticles = [
+      {
+        id: '1',
+        title: '想说的话',
+        summary: '一个多月前，我对编程——尤其是网页前端设计还一窍不通。那时，我只会用豆包生成一些简单的、能在浏览器中直接打开的 HTML 文件。经过这段时间的学习，我已经能够创建需要安装依赖、具备交互功能的真正网页。从对 AI 开发一知半解，到了解并开始学习 Trae 和 Kiro，我从曾经完全不懂 HTML、CSS 和 JS，到如今能借助人工智能工具快速学习，并一步步实现自己长久以来的愿望。虽然这个网页还不完善，AI 也时常需要人工干预，如由于出现错误，需要重新清除 npm 缓存并再次运行 npm install，但这些过程本身也让我对前端设计有了更深的理解。每一次调试、每一次尝试，都让我真切地感受到：未来正在到来。',
+        content: '一个多月前，我对编程——尤其是网页前端设计还一窍不通。那时，我只会用豆包生成一些简单的、能在浏览器中直接打开的 HTML 文件。经过这段时间的学习，我已经能够创建需要安装依赖、具备交互功能的真正网页。从对 AI 开发一知半解，到了解并开始学习 Trae 和 Kiro，我从曾经完全不懂 HTML、CSS 和 JS，到如今能借助人工智能工具快速学习，并一步步实现自己长久以来的愿望。虽然这个网页还不完善，AI 也时常需要人工干预，如由于出现错误，需要重新清除 npm 缓存并再次运行 npm install，但这些过程本身也让我对前端设计有了更深的理解。每一次调试、每一次尝试，都让我真切地感受到：未来正在到来。',
+        tags: ['个人感悟', '编程学习', 'AI开发', '前端设计'],
+        createdAt: new Date().toISOString(),
+        views: 0,
+        likes: 0,
+      },
+    ];
+
+    setArticles(mockArticles);
+  }, [setArticles]);
 
   return (
     <div className="min-h-screen pt-20 sm:pt-24 pb-20">
@@ -137,9 +136,9 @@ export default function OpinionsPage() {
                   <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-white/40 flex-wrap">
                     <span>{formatRelativeTime(article.createdAt)}</span>
                     <span>•</span>
-                    <span>{formatNumber(article.views)} 阅读</span>
+                    <span>{article.views} 阅读</span>
                     <span>•</span>
-                    <span>{formatNumber(article.likes)} 点赞</span>
+                    <span>{article.likes} 点赞</span>
                   </div>
 
                   <div className="flex gap-2 mt-3 sm:mt-4 flex-wrap">

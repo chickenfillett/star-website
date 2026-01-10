@@ -101,26 +101,14 @@ export function useEasterEggs() {
 
     if (contentType === 'article') {
       articleLikeTime.current = Date.now();
-      
+
       setTimeout(() => {
-        if (articleLikeTime.current && 
+        if (articleLikeTime.current &&
             (Date.now() - articleLikeTime.current) / 1000 >= EASTER_EGGS.articleInteraction.triggerDuration / 60) {
           triggerEasterEgg('articleInteraction');
           articleLikeTime.current = null;
         }
       }, EASTER_EGGS.articleInteraction.triggerDuration * 1000);
-    }
-  };
-
-  const handleDeviceTilt = (gamma: number, beta: number) => {
-    if (Math.abs(gamma) > 10 || Math.abs(beta) > 10) {
-      triggerEasterEgg('mobileTilt');
-    }
-  };
-
-  const handleMouseMove = (x: number, y: number) => {
-    if (Math.random() < 0.01) {
-      triggerEasterEgg('cursorTrail');
     }
   };
 
@@ -133,7 +121,5 @@ export function useEasterEggs() {
     handlePhotoDetailLeave,
     checkPhotoDetailEasterEgg,
     handleLike,
-    handleDeviceTilt,
-    handleMouseMove,
   };
 }

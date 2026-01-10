@@ -7,7 +7,6 @@
 
 'use client';
 
-import { useRef } from 'react';
 import { useEffect } from 'react';
 import { STAR_ANIMATION } from '@/constants/animation';
 
@@ -31,8 +30,6 @@ interface ShootingStar {
 }
 
 export default function StarField() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
   useEffect(() => {
     const canvas = document.createElement('canvas');
     canvas.className = 'fixed inset-0 w-full h-full pointer-events-none';
@@ -84,7 +81,7 @@ export default function StarField() {
     const updateShootingStars = () => {
       for (let i = shootingStars.length - 1; i >= 0; i--) {
         const star = shootingStars[i];
-        
+
         star.x += Math.cos(star.angle) * star.speed;
         star.y += Math.sin(star.angle) * star.speed;
         star.length -= star.speed;
@@ -97,10 +94,10 @@ export default function StarField() {
     };
 
     const scheduleShootingStar = () => {
-      const delay = Math.random() * 
+      const delay = Math.random() *
         (STAR_ANIMATION.shootingStarFrequency.max - STAR_ANIMATION.shootingStarFrequency.min) +
         STAR_ANIMATION.shootingStarFrequency.min;
-      
+
       setTimeout(() => {
         createShootingStar();
         scheduleShootingStar();

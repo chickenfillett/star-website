@@ -7,20 +7,18 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeftIcon, Share2Icon, StarIcon, ChevronUpIcon, ChevronDownIcon } from '@/components/ui/Icons';
+import { useParams } from 'next/navigation';
+import { ArrowLeftIcon, Share2Icon, StarIcon } from '@/components/ui/Icons';
 import { useContentStore } from '@/store/contentStore';
 import { useUserStore } from '@/store/userStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useEasterEggs } from '@/hooks/useEasterEggs';
-import { formatDateTime } from '@/utils/format';
 
 export default function ArticleDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { articles } = useContentStore();
   const { toggleArticleLike, isArticleLiked } = useUserStore();
   const { playButtonSound, playPermissionUnlockSound } = useSoundEffects();
@@ -28,26 +26,8 @@ export default function ArticleDetailPage() {
   
   const [showSharePanel, setShowSharePanel] = useState(false);
   const [likeAnimation, setLikeAnimation] = useState(false);
-  const [articleStartTime, setArticleStartTime] = useState<number | null>(null);
 
   const article = articles.find((a) => a.id === params.id);
-
-  useEffect(() => {
-    if (article) {
-      setArticleStartTime(Date.now());
-    }
-  }, [article]);
-
-  useEffect(() => {
-    if (articleStartTime && isArticleLiked(article?.id || '')) {
-      const checkInteractionReminder = setTimeout(() => {
-        if (Date.now() - articleStartTime >= 60000) {
-        }
-      }, 60000);
-
-      return () => clearTimeout(checkInteractionReminder);
-    }
-  }, [articleStartTime, isArticleLiked, article?.id]);
 
   if (!article) {
     return (
