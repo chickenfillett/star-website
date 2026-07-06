@@ -81,16 +81,6 @@ export default function EasterEggs() {
                 </div>
               </div>
             )}
-
-            {easterEgg.type === 'cursorTrail' && (
-              <motion.div
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <StarIcon className="w-4 h-4 text-purple-300 fill-purple-300" />
-              </motion.div>
-            )}
           </motion.div>
         ))}
       </AnimatePresence>

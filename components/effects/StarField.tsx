@@ -1,14 +1,13 @@
 /**
  * 星空背景组件
- * 核心作用：渲染纯黑背景和星空特效
- * 关联界面/功能模块：全局布局
+ * 核心作用：渲染固定定位的画布，绘制闪烁星星与流星
+ * 关联界面/功能模块：全局布局（LayoutWrapper 首个子元素）
  * 依赖文件/接口：constants/animation.ts
  */
 
 'use client';
 
-import { useRef } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { STAR_ANIMATION } from '@/constants/animation';
 
 interface Star {
@@ -16,8 +15,10 @@ interface Star {
   x: number;
   y: number;
   size: number;
-  opacity: number;
-  twinkleDelay: number;
+  baseOpacity: number;
+  twinkleSpeed: number;
+  twinklePhase: number;
+  color: { r: number; g: number; b: number };
 }
 
 interface ShootingStar {
@@ -30,20 +31,57 @@ interface ShootingStar {
   opacity: number;
 }
 
+interface RgbColor {
+  r: number;
+  g: number;
+  b: number;
+}
+
+const STAR_COUNT = 120;
+const MAX_SHOOTING_STARS = STAR_ANIMATION.shootingStar.maxConcurrent;
+
+// 将 "rgba(r, g, b, a)" 解析为 { r, g, b }，便于按帧动态合成透明度
+function parseRgb(rgba: string): RgbColor {
+  const match = rgba.match(/rgba?\(([^)]+)\)/);
+  if (!match) return { r: 255, g: 255, b: 255 };
+  const parts = match[1].split(',').map((s) => parseFloat(s.trim()));
+  return {
+    r: Number.isFinite(parts[0]) ? parts[0] : 255,
+    g: Number.isFinite(parts[1]) ? parts[1] : 255,
+    b: Number.isFinite(parts[2]) ? parts[2] : 255,
+  };
+}
+
 export default function StarField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = document.createElement('canvas');
-    canvas.className = 'fixed inset-0 w-full h-full pointer-events-none';
-    canvas.style.zIndex = '-1';
-    document.body.appendChild(canvas);
-
+    const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let animationId = 0;
+    let shootingStarTimer: ReturnType<typeof setTimeout> | null = null;
     const stars: Star[] = [];
     const shootingStars: ShootingStar[] = [];
+    const colorPalette: RgbColor[] = STAR_ANIMATION.colors.map(parseRgb);
+
+    const generateStars = () => {
+      stars.length = 0;
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          id: i,
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: 0.5 + Math.random() * 1.5,
+          baseOpacity: 0.3 + Math.random() * 0.7,
+          twinkleSpeed: 0.5 + Math.random() * 2,
+          twinklePhase: Math.random() * Math.PI * 2,
+          color: colorPalette[Math.floor(Math.random() * colorPalette.length)],
+        });
+      }
+    };
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -51,122 +89,97 @@ export default function StarField() {
       generateStars();
     };
 
-    const generateStars = () => {
-      stars.length = 0;
-      const starCount = STAR_ANIMATION.particleCount.static;
-
-      for (let i = 0; i < starCount; i++) {
-        stars.push({
-          id: i,
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * (STAR_ANIMATION.starSize.max - STAR_ANIMATION.starSize.min) + STAR_ANIMATION.starSize.min,
-          opacity: Math.random() * 0.7 + 0.3,
-          twinkleDelay: Math.random() * STAR_ANIMATION.twinkleInterval.max,
-        });
-      }
-    };
-
     const createShootingStar = () => {
-      const shootingStar: ShootingStar = {
-        id: Date.now(),
+      if (shootingStars.length >= MAX_SHOOTING_STARS) return;
+      shootingStars.push({
+        id: Date.now() + Math.random(),
         x: Math.random() * canvas.width * 0.8,
         y: Math.random() * canvas.height * 0.5,
         angle: Math.PI / 4 + (Math.random() - 0.5) * 1.2,
-        length: STAR_ANIMATION.shootingStar.trailLength,
-        speed: STAR_ANIMATION.shootingStar.speed * 2,
+        length: 100 + Math.random() * 100,
+        speed: 6 + Math.random() * 6,
         opacity: 1,
-      };
-
-      shootingStars.push(shootingStar);
+      });
     };
 
-    const updateShootingStars = () => {
-      for (let i = shootingStars.length - 1; i >= 0; i--) {
-        const star = shootingStars[i];
-        
-        star.x += Math.cos(star.angle) * star.speed;
-        star.y += Math.sin(star.angle) * star.speed;
-        star.length -= star.speed;
-        star.opacity -= 0.015;
-
-        if (star.length <= 0 || star.opacity <= 0) {
-          shootingStars.splice(i, 1);
-        }
-      }
-    };
-
-    const scheduleShootingStar = () => {
-      const delay = Math.random() * 
-        (STAR_ANIMATION.shootingStarFrequency.max - STAR_ANIMATION.shootingStarFrequency.min) +
-        STAR_ANIMATION.shootingStarFrequency.min;
-      
-      setTimeout(() => {
+    const scheduleNextShootingStar = () => {
+      const delay = 3000 + Math.random() * 7000; // 3-10s
+      shootingStarTimer = setTimeout(() => {
         createShootingStar();
-        scheduleShootingStar();
+        scheduleNextShootingStar();
       }, delay);
     };
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const now = Date.now() / 1000;
 
-      const now = Date.now();
-
-      stars.forEach((star) => {
-        const twinkleProgress = ((now + star.twinkleDelay) % STAR_ANIMATION.twinkleInterval.max) / STAR_ANIMATION.twinkleInterval.max;
-        const twinkleOpacity = 0.3 + Math.sin(twinkleProgress * Math.PI * 2) * 0.4;
-
+      // 绘制星星：基于每颗星的相位与速度做正弦闪烁
+      for (const star of stars) {
+        const twinkle = 0.5 + 0.5 * Math.sin(now * star.twinkleSpeed + star.twinklePhase);
+        const opacity = star.baseOpacity * (0.4 + 0.6 * twinkle);
+        const { r, g, b } = star.color;
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${twinkleOpacity})`;
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
         ctx.fill();
-      });
+      }
 
-      shootingStars.forEach((shootingStar) => {
-        const endX = shootingStar.x + Math.cos(shootingStar.angle) * shootingStar.length;
-        const endY = shootingStar.y + Math.sin(shootingStar.angle) * shootingStar.length;
+      // 绘制并更新流星：拖尾使用白到透明的线性渐变
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const s = shootingStars[i];
+        const endX = s.x + Math.cos(s.angle) * s.length;
+        const endY = s.y + Math.sin(s.angle) * s.length;
 
-        const gradient = ctx.createLinearGradient(
-          shootingStar.x,
-          shootingStar.y,
-          endX,
-          endY
-        );
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${shootingStar.opacity})`);
-        gradient.addColorStop(0.2, `rgba(255, 255, 255, ${shootingStar.opacity * 0.8})`);
-        gradient.addColorStop(0.5, `rgba(255, 255, 255, ${shootingStar.opacity * 0.5})`);
-        gradient.addColorStop(0.8, `rgba(255, 255, 255, ${shootingStar.opacity * 0.2})`);
-        gradient.addColorStop(1, 'transparent');
+        const gradient = ctx.createLinearGradient(s.x, s.y, endX, endY);
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${s.opacity})`);
+        gradient.addColorStop(0.5, `rgba(255, 255, 255, ${s.opacity * 0.5})`);
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
         ctx.beginPath();
-        ctx.moveTo(shootingStar.x, shootingStar.y);
+        ctx.moveTo(s.x, s.y);
         ctx.lineTo(endX, endY);
         ctx.strokeStyle = gradient;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.stroke();
 
+        // 流星头部高亮点
         ctx.beginPath();
-        ctx.arc(shootingStar.x, shootingStar.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${shootingStar.opacity})`;
+        ctx.arc(s.x, s.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
         ctx.fill();
-      });
 
-      updateShootingStars();
+        s.x += Math.cos(s.angle) * s.speed;
+        s.y += Math.sin(s.angle) * s.speed;
+        s.length -= s.speed;
+        s.opacity -= 0.012;
 
-      requestAnimationFrame(animate);
+        if (s.opacity <= 0 || s.length <= 0) {
+          shootingStars.splice(i, 1);
+        }
+      }
+
+      animationId = requestAnimationFrame(animate);
     };
 
-    window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-    scheduleShootingStar();
+    scheduleNextShootingStar();
     animate();
+    window.addEventListener('resize', resizeCanvas);
 
     return () => {
+      cancelAnimationFrame(animationId);
+      if (shootingStarTimer) clearTimeout(shootingStarTimer);
       window.removeEventListener('resize', resizeCanvas);
-      document.body.removeChild(canvas);
     };
   }, []);
 
-  return null;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 w-full h-full pointer-events-none"
+      style={{ zIndex: 0 }}
+    />
+  );
 }

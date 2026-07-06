@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import StarField from '@/components/effects/StarField';
 import EasterEggs from '@/components/effects/EasterEggs';
-import CursorGlow from '@/components/effects/CursorGlow';
 import ClickSparkEffect from '@/components/effects/ClickSparkEffect';
 import SoundControl from '@/components/ui/SoundControl';
 import DesktopNavigation from '@/components/layout/DesktopNavigation';
@@ -31,7 +30,6 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       <StarField />
       <EasterEggs />
       <ClickSparkEffect />
-      {!isMobile && <CursorGlow />}
       <SoundControl />
       
       {isMobile ? <MobileNavigation /> : <DesktopNavigation />}

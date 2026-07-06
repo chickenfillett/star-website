@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { StarIcon, GlobeIcon, LockIcon } from '@/components/ui/Icons';
+import { StarIcon, GlobeIcon } from '@/components/ui/Icons';
 import { motion } from 'framer-motion';
 import { useUIStore } from '@/store/uiStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -96,20 +96,6 @@ export default function DesktopNavigation() {
               </Link>
             );
           })}
-
-          <Link
-            href="/private"
-            className="flex items-center gap-2 text-white/50 hover:text-white transition-colors smooth-transition active-press"
-            onClick={playButtonSound}
-          >
-            <motion.div
-              whileHover={{ scale: 1.15, rotate: -5 }}
-              whileTap={{ scale: 0.9 }}
-              transition={ANIMATION.spring.snappy}
-            >
-              <LockIcon className="w-4 h-4" />
-            </motion.div>
-          </Link>
 
           <motion.button
             whileHover={{ scale: 1.05 }}

@@ -19,6 +19,7 @@ interface AudioState {
   playNextTrack: () => void;
   initializeAudio: () => void;
   preloadAudio: () => void;
+  tryAutoplay: () => Promise<void>;
 }
 
 // 音乐列表
@@ -40,12 +41,12 @@ export const useAudioStore = create<AudioState>((set, get) => ({
     if (!currentAudio) {
       const audio = new Audio(TRACKS[0]);
       audio.volume = 0.3;
-      
+
       // 添加结束事件监听，自动播放下一首
       audio.addEventListener('ended', () => {
         get().playNextTrack();
       });
-      
+
       set({ audio });
     }
   },
@@ -61,9 +62,14 @@ export const useAudioStore = create<AudioState>((set, get) => ({
 
   // 播放/暂停切换
   toggleAudio: async () => {
-    const { audio, isPlaying } = get();
+    let { audio, isPlaying } = get();
+    // 如果音频对象不存在，先初始化再立即尝试播放
     if (!audio) {
       get().initializeAudio();
+      audio = get().audio;
+    }
+
+    if (!audio) {
       return;
     }
 
@@ -77,6 +83,7 @@ export const useAudioStore = create<AudioState>((set, get) => ({
       }
     } catch (error) {
       console.error('音频播放失败:', error);
+      set({ isPlaying: false });
     }
   },
 
@@ -84,17 +91,40 @@ export const useAudioStore = create<AudioState>((set, get) => ({
   playNextTrack: () => {
     const { currentTrackIndex, tracks, audio, isPlaying } = get();
     const nextIndex = (currentTrackIndex + 1) % tracks.length;
-    
+
     if (audio) {
       audio.src = tracks[nextIndex];
+      audio.load();
       if (isPlaying) {
         audio.play().catch(error => {
           console.error('音频播放失败:', error);
+          set({ isPlaying: false });
         });
       }
     }
-    
+
     set({ currentTrackIndex: nextIndex });
+  },
+
+  // 尝试自动播放（在用户首次交互后调用）
+  tryAutoplay: async () => {
+    let { audio, isPlaying } = get();
+    if (!audio) {
+      get().initializeAudio();
+      audio = get().audio;
+    }
+
+    if (!audio || isPlaying) {
+      return;
+    }
+
+    try {
+      await audio.play();
+      set({ isPlaying: true });
+    } catch (error) {
+      console.error('自动播放失败:', error);
+      set({ isPlaying: false });
+    }
   },
 
   // 设置音频对象

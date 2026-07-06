@@ -108,11 +108,11 @@ export default function HomePage() {
               transition={{ delay: 0.4 }}
             >
               <p className="text-lg sm:text-xl md:text-2xl text-white/80 leading-relaxed mb-2">
-                    Welcome
-                  </p>
-                  <p className="text-base sm:text-lg md:text-xl text-white/60 leading-relaxed">
-                    Merry Christmas
-                  </p>
+                星河璀璨
+              </p>
+              <p className="text-base sm:text-lg md:text-xl text-white/60 leading-relaxed">
+                欢迎到来
+              </p>
             </motion.div>
           </div>
         </div>

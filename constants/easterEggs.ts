@@ -66,14 +66,6 @@ export const EASTER_EGGS = {
     effect: 'parallaxStars',
     description: '移动端倾斜设备时，星空粒子随倾斜方向流动',
   },
-  
-  cursorTrail: {
-    name: 'cursorTrail',
-    platform: 'desktop',
-    effect: 'cursorParticles',
-    particleCount: 5,
-    description: '桌面端光标移动时，尾随微型星空粒子',
-  },
 } as const;
 
 export type EasterEggType = keyof typeof EASTER_EGGS;

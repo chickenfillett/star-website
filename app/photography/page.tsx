@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useContentStore } from '@/store/contentStore';
+import { useAudioStore } from '@/store/audioStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { formatRelativeTime } from '@/utils/format';
 import { throttle } from '@/utils/helpers';
@@ -23,44 +24,36 @@ export default function PhotographyPage() {
   const { playButtonSound } = useSoundEffects();
   const [filteredPhotos, setFilteredPhotos] = useState(photos);
   // 使用全局音频状态管理
-  const { isPlaying, toggleAudio, initializeAudio, preloadAudio } = useAudioStore();
-  
+  const { isPlaying, toggleAudio, initializeAudio, preloadAudio, tryAutoplay } = useAudioStore();
+
   // 组件挂载时初始化音频
   useEffect(() => {
     // 预加载音频文件
     preloadAudio();
     // 初始化音频对象
     initializeAudio();
-    
-    // 处理浏览器自动播放策略，等待用户交互
-    const handleUserInteraction = async () => {
-      try {
-        // 初始化后自动尝试播放
-        const audio = document.querySelector('audio');
-        if (audio && !isPlaying) {
-          await audio.play();
-          // 这里不直接调用setIsPlaying，让音频播放后通过事件监听更新状态
-        }
-      } catch (error) {
-        console.error('自动播放失败:', error);
-      }
-      
+
+    // 处理浏览器自动播放策略，等待用户首次交互后尝试播放
+    const handleUserInteraction = () => {
+      tryAutoplay();
+      // 触发一次后移除所有监听器
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('keydown', handleUserInteraction);
     };
-    
+
     // 监听用户交互事件
     document.addEventListener('click', handleUserInteraction);
     document.addEventListener('touchstart', handleUserInteraction);
     document.addEventListener('keydown', handleUserInteraction);
-    
+
     return () => {
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('keydown', handleUserInteraction);
     };
-  }, [isPlaying, initializeAudio, preloadAudio]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // 包装toggleAudio函数，添加按钮音效
   const handleToggleAudio = () => {
@@ -78,8 +71,8 @@ export default function PhotographyPage() {
         {
           id: '1',
           title: '',
-          url: '/image/photo1.jpg',
-          thumbnailUrl: '/image/photo1.jpg',
+          url: '/image/photo1.webp',
+          thumbnailUrl: '/image/photo1.webp',
           category: 'landscape',
           tags: ['雪山', '滑雪', '运动', '自然', '户外'],
           description: '',
@@ -88,8 +81,8 @@ export default function PhotographyPage() {
         {
           id: '2',
           title: '',
-          url: '/image/photo2.jpg',
-          thumbnailUrl: '/image/photo2.jpg',
+          url: '/image/photo2.webp',
+          thumbnailUrl: '/image/photo2.webp',
           category: 'portrait',
           tags: ['人像', '宿舍', '生活', '日常', '室内'],
           description: '',
@@ -98,8 +91,8 @@ export default function PhotographyPage() {
         {
           id: '3',
           title: '',
-          url: '/image/photo3.jpg',
-          thumbnailUrl: '/image/photo3.jpg',
+          url: '/image/photo3.webp',
+          thumbnailUrl: '/image/photo3.webp',
           category: 'portrait',
           tags: ['人像', '学生', '课堂', '学习', '教室'],
           description: '',
@@ -108,8 +101,8 @@ export default function PhotographyPage() {
         {
           id: '4',
           title: '',
-          url: '/image/photo4.jpg',
-          thumbnailUrl: '/image/photo4.jpg',
+          url: '/image/photo4.webp',
+          thumbnailUrl: '/image/photo4.webp',
           category: 'nature',
           tags: ['花卉', '大丽花', '花朵', '植物', '自然'],
           description: '',
@@ -118,8 +111,8 @@ export default function PhotographyPage() {
         {
           id: '5',
           title: '',
-          url: '/image/photo5.jpg',
-          thumbnailUrl: '/image/photo5.jpg',
+          url: '/image/photo5.webp',
+          thumbnailUrl: '/image/photo5.webp',
           category: 'portrait',
           tags: ['人像', '学生', '合影', '团队', '青春'],
           description: '',
@@ -129,8 +122,8 @@ export default function PhotographyPage() {
         {
           id: '6',
           title: '',
-          url: '/image/6.jpg',
-          thumbnailUrl: '/image/6.jpg',
+          url: '/image/6.webp',
+          thumbnailUrl: '/image/6.webp',
           category: 'landscape',
           tags: ['自然', '风景', '户外', '山脉', '森林'],
           description: '',
@@ -139,8 +132,8 @@ export default function PhotographyPage() {
         {
           id: '7',
           title: '',
-          url: '/image/7.jpg',
-          thumbnailUrl: '/image/7.jpg',
+          url: '/image/7.webp',
+          thumbnailUrl: '/image/7.webp',
           category: 'urban',
           tags: ['城市', '建筑', '街景', '现代', '都市'],
           description: '',
@@ -149,8 +142,8 @@ export default function PhotographyPage() {
         {
           id: '8',
           title: '',
-          url: '/image/8.jpg',
-          thumbnailUrl: '/image/8.jpg',
+          url: '/image/8.webp',
+          thumbnailUrl: '/image/8.webp',
           category: 'portrait',
           tags: ['人像', '表情', '特写', '情绪', '面部'],
           description: '',
@@ -159,8 +152,8 @@ export default function PhotographyPage() {
         {
           id: '9',
           title: '',
-          url: '/image/9.jpg',
-          thumbnailUrl: '/image/9.jpg',
+          url: '/image/9.webp',
+          thumbnailUrl: '/image/9.webp',
           category: 'landscape',
           tags: ['山水', '风景', '自然', '湖泊', '倒影'],
           description: '',
@@ -169,8 +162,8 @@ export default function PhotographyPage() {
         {
           id: '10',
           title: '',
-          url: '/image/10.jpg',
-          thumbnailUrl: '/image/10.jpg',
+          url: '/image/10.webp',
+          thumbnailUrl: '/image/10.webp',
           category: 'landscape',
           tags: ['植物', '绿色', '自然', '森林', '树木'],
           description: '',
@@ -179,8 +172,8 @@ export default function PhotographyPage() {
         {
           id: '11',
           title: '',
-          url: '/image/11.jpg',
-          thumbnailUrl: '/image/11.jpg',
+          url: '/image/11.webp',
+          thumbnailUrl: '/image/11.webp',
           category: 'urban',
           tags: ['城市', '夜景', '灯光', '都市', '夜晚'],
           description: '',
@@ -189,8 +182,8 @@ export default function PhotographyPage() {
         {
           id: '12',
           title: '',
-          url: '/image/12.jpg',
-          thumbnailUrl: '/image/12.jpg',
+          url: '/image/12.webp',
+          thumbnailUrl: '/image/12.webp',
           category: 'portrait',
           tags: ['人像', '生活', '日常', '休闲', '室内'],
           description: '',
@@ -199,8 +192,8 @@ export default function PhotographyPage() {
         {
           id: '13',
           title: '',
-          url: '/image/13.jpg',
-          thumbnailUrl: '/image/13.jpg',
+          url: '/image/13.webp',
+          thumbnailUrl: '/image/13.webp',
           category: 'nature',
           tags: ['天空', '云彩', '自然', '天气', '户外'],
           description: '',
@@ -209,8 +202,8 @@ export default function PhotographyPage() {
         {
           id: '14',
           title: '',
-          url: '/image/14.jpg',
-          thumbnailUrl: '/image/14.jpg',
+          url: '/image/14.webp',
+          thumbnailUrl: '/image/14.webp',
           category: 'urban',
           tags: ['城市', '交通', '街道', '车辆', '都市'],
           description: '',
@@ -219,8 +212,8 @@ export default function PhotographyPage() {
         {
           id: '15',
           title: '',
-          url: '/image/15.jpg',
-          thumbnailUrl: '/image/15.jpg',
+          url: '/image/15.webp',
+          thumbnailUrl: '/image/15.webp',
           category: 'landscape',
           tags: ['山脉', '风景', '户外', '自然', '徒步'],
           description: '',
@@ -229,8 +222,8 @@ export default function PhotographyPage() {
         {
           id: '16',
           title: '',
-          url: '/image/16.jpg',
-          thumbnailUrl: '/image/16.jpg',
+          url: '/image/16.webp',
+          thumbnailUrl: '/image/16.webp',
           category: 'nature',
           tags: ['花卉', '春天', '花朵', '自然', '植物'],
           description: '',
@@ -239,8 +232,8 @@ export default function PhotographyPage() {
         {
           id: '17',
           title: '',
-          url: '/image/17.jpg',
-          thumbnailUrl: '/image/17.jpg',
+          url: '/image/17.webp',
+          thumbnailUrl: '/image/17.webp',
           category: 'portrait',
           tags: ['人像', '微笑', '青春', '快乐', '正面'],
           description: '',
@@ -249,8 +242,8 @@ export default function PhotographyPage() {
         {
           id: '18',
           title: '',
-          url: '/image/18.jpg',
-          thumbnailUrl: '/image/18.jpg',
+          url: '/image/18.webp',
+          thumbnailUrl: '/image/18.webp',
           category: 'urban',
           tags: ['城市', '建筑', '现代', '摩天大楼', '都市'],
           description: '',
@@ -259,8 +252,8 @@ export default function PhotographyPage() {
         {
           id: '19',
           title: '',
-          url: '/image/19.jpg',
-          thumbnailUrl: '/image/19.jpg',
+          url: '/image/19.webp',
+          thumbnailUrl: '/image/19.webp',
           category: 'landscape',
           tags: ['湖泊', '倒影', '风景', '自然', '平静'],
           description: '',
@@ -269,8 +262,8 @@ export default function PhotographyPage() {
         {
           id: '20',
           title: '',
-          url: '/image/20.jpg',
-          thumbnailUrl: '/image/20.jpg',
+          url: '/image/20.webp',
+          thumbnailUrl: '/image/20.webp',
           category: 'nature',
           tags: ['森林', '树木', '自然', '绿色', '户外'],
           description: '',
@@ -279,8 +272,8 @@ export default function PhotographyPage() {
         {
           id: '21',
           title: '',
-          url: '/image/21.jpg',
-          thumbnailUrl: '/image/21.jpg',
+          url: '/image/21.webp',
+          thumbnailUrl: '/image/21.webp',
           category: 'portrait',
           tags: ['人像', '沉思', '表情', '情绪', '思考'],
           description: '',
@@ -289,8 +282,8 @@ export default function PhotographyPage() {
         {
           id: '22',
           title: '',
-          url: '/image/22.jpg',
-          thumbnailUrl: '/image/22.jpg',
+          url: '/image/22.webp',
+          thumbnailUrl: '/image/22.webp',
           category: 'urban',
           tags: ['城市', '街拍', '行人', '生活', '都市'],
           description: '',
@@ -299,8 +292,8 @@ export default function PhotographyPage() {
         {
           id: '23',
           title: '',
-          url: '/image/23.jpg',
-          thumbnailUrl: '/image/23.jpg',
+          url: '/image/23.webp',
+          thumbnailUrl: '/image/23.webp',
           category: 'nature',
           tags: ['海洋', '海滩', '自然', '海浪', '沙滩'],
           description: '',
@@ -309,8 +302,8 @@ export default function PhotographyPage() {
         {
           id: '24',
           title: '',
-          url: '/image/24.jpg',
-          thumbnailUrl: '/image/24.jpg',
+          url: '/image/24.webp',
+          thumbnailUrl: '/image/24.webp',
           category: 'landscape',
           tags: ['日落', '天空', '风景', '自然', '黄昏'],
           description: '',
@@ -320,8 +313,8 @@ export default function PhotographyPage() {
         {
           id: '25',
           title: '',
-          url: '/image/25.jpg',
-          thumbnailUrl: '/image/25.jpg',
+          url: '/image/25.webp',
+          thumbnailUrl: '/image/25.webp',
           category: 'nature',
           tags: ['森林', '树木', '自然', '阳光', '户外'],
           description: '',
@@ -330,8 +323,8 @@ export default function PhotographyPage() {
         {
           id: '26',
           title: '',
-          url: '/image/26.jpg',
-          thumbnailUrl: '/image/26.jpg',
+          url: '/image/26.webp',
+          thumbnailUrl: '/image/26.webp',
           category: 'portrait',
           tags: ['人像', '特写', '表情', '眼神', '面部'],
           description: '',
@@ -340,8 +333,8 @@ export default function PhotographyPage() {
         {
           id: '27',
           title: '',
-          url: '/image/27.jpg',
-          thumbnailUrl: '/image/27.jpg',
+          url: '/image/27.webp',
+          thumbnailUrl: '/image/27.webp',
           category: 'urban',
           tags: ['城市', '建筑', '街景', '历史', '老建筑'],
           description: '',
@@ -350,8 +343,8 @@ export default function PhotographyPage() {
         {
           id: '28',
           title: '',
-          url: '/image/28.jpg',
-          thumbnailUrl: '/image/28.jpg',
+          url: '/image/28.webp',
+          thumbnailUrl: '/image/28.webp',
           category: 'nature',
           tags: ['花卉', '春天', '花朵', '粉色', '自然'],
           description: '',
@@ -360,8 +353,8 @@ export default function PhotographyPage() {
         {
           id: '29',
           title: '',
-          url: '/image/29.jpg',
-          thumbnailUrl: '/image/29.jpg',
+          url: '/image/29.webp',
+          thumbnailUrl: '/image/29.webp',
           category: 'landscape',
           tags: ['山脉', '户外', '风景', '自然', '高峰'],
           description: '',
@@ -370,8 +363,8 @@ export default function PhotographyPage() {
         {
           id: '30',
           title: '',
-          url: '/image/30.jpg',
-          thumbnailUrl: '/image/30.jpg',
+          url: '/image/30.webp',
+          thumbnailUrl: '/image/30.webp',
           category: 'portrait',
           tags: ['人像', '生活', '日常', '休闲', '放松'],
           description: '',
@@ -380,8 +373,8 @@ export default function PhotographyPage() {
         {
           id: '31',
           title: '',
-          url: '/image/31.jpg',
-          thumbnailUrl: '/image/31.jpg',
+          url: '/image/31.webp',
+          thumbnailUrl: '/image/31.webp',
           category: 'nature',
           tags: ['天空', '云彩', '自然', '蓝天', '户外'],
           description: '',
@@ -390,8 +383,8 @@ export default function PhotographyPage() {
         {
           id: '32',
           title: '',
-          url: '/image/32.jpg',
-          thumbnailUrl: '/image/32.jpg',
+          url: '/image/32.webp',
+          thumbnailUrl: '/image/32.webp',
           category: 'urban',
           tags: ['城市', '交通', '街道', '行人', '繁忙'],
           description: '',
@@ -400,8 +393,8 @@ export default function PhotographyPage() {
         {
           id: '33',
           title: '',
-          url: '/image/33.jpg',
-          thumbnailUrl: '/image/33.jpg',
+          url: '/image/33.webp',
+          thumbnailUrl: '/image/33.webp',
           category: 'landscape',
           tags: ['湖泊', '倒影', '风景', '自然', '宁静'],
           description: '',
@@ -410,8 +403,8 @@ export default function PhotographyPage() {
         {
           id: '34',
           title: '',
-          url: '/image/34.jpg',
-          thumbnailUrl: '/image/34.jpg',
+          url: '/image/34.webp',
+          thumbnailUrl: '/image/34.webp',
           category: 'nature',
           tags: ['海洋', '海滩', '海浪', '沙滩', '自然'],
           description: '',
@@ -420,8 +413,8 @@ export default function PhotographyPage() {
         {
           id: '35',
           title: '',
-          url: '/image/35.jpg',
-          thumbnailUrl: '/image/35.jpg',
+          url: '/image/35.webp',
+          thumbnailUrl: '/image/35.webp',
           category: 'portrait',
           tags: ['人像', '沉思', '表情', '安静', '思考'],
           description: '',
@@ -430,8 +423,8 @@ export default function PhotographyPage() {
         {
           id: '36',
           title: '',
-          url: '/image/36.jpg',
-          thumbnailUrl: '/image/36.jpg',
+          url: '/image/36.webp',
+          thumbnailUrl: '/image/36.webp',
           category: 'urban',
           tags: ['城市', '街拍', '行人', '生活', '都市'],
           description: '',
@@ -440,8 +433,8 @@ export default function PhotographyPage() {
         {
           id: '37',
           title: '',
-          url: '/image/37.jpg',
-          thumbnailUrl: '/image/37.jpg',
+          url: '/image/37.webp',
+          thumbnailUrl: '/image/37.webp',
           category: 'nature',
           tags: ['植物', '绿色', '自然', '叶子', '清新'],
           description: '',
@@ -450,8 +443,8 @@ export default function PhotographyPage() {
         {
           id: '38',
           title: '',
-          url: '/image/38.jpg',
-          thumbnailUrl: '/image/38.jpg',
+          url: '/image/38.webp',
+          thumbnailUrl: '/image/38.webp',
           category: 'landscape',
           tags: ['山水', '风景', '自然', '山峰', '河流'],
           description: '',
@@ -460,8 +453,8 @@ export default function PhotographyPage() {
         {
           id: '39',
           title: '',
-          url: '/image/39.jpg',
-          thumbnailUrl: '/image/39.jpg',
+          url: '/image/39.webp',
+          thumbnailUrl: '/image/39.webp',
           category: 'portrait',
           tags: ['人像', '微笑', '青春', '活力', '快乐'],
           description: '',
@@ -470,8 +463,8 @@ export default function PhotographyPage() {
         {
           id: '40',
           title: '',
-          url: '/image/40.jpg',
-          thumbnailUrl: '/image/40.jpg',
+          url: '/image/40.webp',
+          thumbnailUrl: '/image/40.webp',
           category: 'urban',
           tags: ['城市', '建筑', '现代', '设计', '创意'],
           description: '',
@@ -481,8 +474,8 @@ export default function PhotographyPage() {
         {
           id: '41',
           title: '',
-          url: '/image/41.jpg',
-          thumbnailUrl: '/image/41.jpg',
+          url: '/image/41.webp',
+          thumbnailUrl: '/image/41.webp',
           category: 'landscape',
           tags: ['风景', '自然', '户外', '山脉', '山峰'],
           description: '',
@@ -491,8 +484,8 @@ export default function PhotographyPage() {
         {
           id: '42',
           title: '',
-          url: '/image/42.jpg',
-          thumbnailUrl: '/image/42.jpg',
+          url: '/image/42.webp',
+          thumbnailUrl: '/image/42.webp',
           category: 'portrait',
           tags: ['人像', '微笑', '青春', '快乐', '正面'],
           description: '',
@@ -501,8 +494,8 @@ export default function PhotographyPage() {
         {
           id: '43',
           title: '',
-          url: '/image/43.jpg',
-          thumbnailUrl: '/image/43.jpg',
+          url: '/image/43.webp',
+          thumbnailUrl: '/image/43.webp',
           category: 'urban',
           tags: ['城市', '街道', '建筑', '街景', '都市'],
           description: '',
@@ -511,8 +504,8 @@ export default function PhotographyPage() {
         {
           id: '45',
           title: '',
-          url: '/image/45.jpg',
-          thumbnailUrl: '/image/45.jpg',
+          url: '/image/45.webp',
+          thumbnailUrl: '/image/45.webp',
           category: 'nature',
           tags: ['自然', '植物', '绿色', '叶子', '清新'],
           description: '',
@@ -521,8 +514,8 @@ export default function PhotographyPage() {
         {
           id: '46',
           title: '',
-          url: '/image/46.jpg',
-          thumbnailUrl: '/image/46.jpg',
+          url: '/image/46.webp',
+          thumbnailUrl: '/image/46.webp',
           category: 'portrait',
           tags: ['人像', '表情', '特写', '情绪', '面部'],
           description: '',
@@ -531,8 +524,8 @@ export default function PhotographyPage() {
         {
           id: '47',
           title: '',
-          url: '/image/47.jpg',
-          thumbnailUrl: '/image/47.jpg',
+          url: '/image/47.webp',
+          thumbnailUrl: '/image/47.webp',
           category: 'urban',
           tags: ['城市', '夜景', '灯光', '夜晚', '都市'],
           description: '',
@@ -541,8 +534,8 @@ export default function PhotographyPage() {
         {
           id: '48',
           title: '',
-          url: '/image/48.jpg',
-          thumbnailUrl: '/image/48.jpg',
+          url: '/image/48.webp',
+          thumbnailUrl: '/image/48.webp',
           category: 'landscape',
           tags: ['山水', '风景', '自然', '河流', '山脉'],
           description: '',
@@ -551,8 +544,8 @@ export default function PhotographyPage() {
         {
           id: '49',
           title: '',
-          url: '/image/49.jpg',
-          thumbnailUrl: '/image/49.jpg',
+          url: '/image/49.webp',
+          thumbnailUrl: '/image/49.webp',
           category: 'nature',
           tags: ['花卉', '花朵', '植物', '自然', '色彩'],
           description: '',
@@ -561,8 +554,8 @@ export default function PhotographyPage() {
         {
           id: '50',
           title: '',
-          url: '/image/50.jpg',
-          thumbnailUrl: '/image/50.jpg',
+          url: '/image/50.webp',
+          thumbnailUrl: '/image/50.webp',
           category: 'portrait',
           tags: ['人像', '生活', '日常', '休闲', '放松'],
           description: '',
@@ -571,8 +564,8 @@ export default function PhotographyPage() {
         {
           id: '51',
           title: '',
-          url: '/image/51.jpg',
-          thumbnailUrl: '/image/51.jpg',
+          url: '/image/51.webp',
+          thumbnailUrl: '/image/51.webp',
           category: 'urban',
           tags: ['城市', '建筑', '现代', '摩天大楼', '天际线'],
           description: '',
@@ -581,8 +574,8 @@ export default function PhotographyPage() {
         {
           id: '52',
           title: '',
-          url: '/image/52.jpg',
-          thumbnailUrl: '/image/52.jpg',
+          url: '/image/52.webp',
+          thumbnailUrl: '/image/52.webp',
           category: 'nature',
           tags: ['海洋', '海滩', '海浪', '沙滩', '阳光'],
           description: '',
@@ -591,8 +584,8 @@ export default function PhotographyPage() {
         {
           id: '53',
           title: '',
-          url: '/image/53.jpg',
-          thumbnailUrl: '/image/53.jpg',
+          url: '/image/53.webp',
+          thumbnailUrl: '/image/53.webp',
           category: 'portrait',
           tags: ['人像', '沉思', '安静', '思考', '表情'],
           description: '',
@@ -601,8 +594,8 @@ export default function PhotographyPage() {
         {
           id: '54',
           title: '',
-          url: '/image/54.jpg',
-          thumbnailUrl: '/image/54.jpg',
+          url: '/image/54.webp',
+          thumbnailUrl: '/image/54.webp',
           category: 'landscape',
           tags: ['湖泊', '水面', '风景', '自然', '平静'],
           description: '',
@@ -611,8 +604,8 @@ export default function PhotographyPage() {
         {
           id: '55',
           title: '',
-          url: '/image/55.jpg',
-          thumbnailUrl: '/image/55.jpg',
+          url: '/image/55.webp',
+          thumbnailUrl: '/image/55.webp',
           category: 'nature',
           tags: ['森林', '树木', '自然', '绿色', '户外'],
           description: '',
@@ -621,8 +614,8 @@ export default function PhotographyPage() {
         {
           id: '56',
           title: '',
-          url: '/image/56.jpg',
-          thumbnailUrl: '/image/56.jpg',
+          url: '/image/56.webp',
+          thumbnailUrl: '/image/56.webp',
           category: 'urban',
           tags: ['城市', '街拍', '行人', '生活', '街头'],
           description: '',
@@ -631,8 +624,8 @@ export default function PhotographyPage() {
         {
           id: '57',
           title: '',
-          url: '/image/57.jpg',
-          thumbnailUrl: '/image/57.jpg',
+          url: '/image/57.webp',
+          thumbnailUrl: '/image/57.webp',
           category: 'landscape',
           tags: ['日落', '黄昏', '天空', '风景', '自然'],
           description: '',
@@ -641,8 +634,8 @@ export default function PhotographyPage() {
         {
           id: '58',
           title: '',
-          url: '/image/58.jpg',
-          thumbnailUrl: '/image/58.jpg',
+          url: '/image/58.webp',
+          thumbnailUrl: '/image/58.webp',
           category: 'nature',
           tags: ['花卉', '春天', '花朵', '粉色', '自然'],
           description: '',
@@ -651,8 +644,8 @@ export default function PhotographyPage() {
         {
           id: '59',
           title: '',
-          url: '/image/59.jpg',
-          thumbnailUrl: '/image/59.jpg',
+          url: '/image/59.webp',
+          thumbnailUrl: '/image/59.webp',
           category: 'portrait',
           tags: ['人像', '微笑', '快乐', '青春', '活力'],
           description: '',
@@ -661,8 +654,8 @@ export default function PhotographyPage() {
         {
           id: '60',
           title: '',
-          url: '/image/60.jpg',
-          thumbnailUrl: '/image/60.jpg',
+          url: '/image/60.webp',
+          thumbnailUrl: '/image/60.webp',
           category: 'urban',
           tags: ['城市', '建筑', '历史', '老建筑', '街景'],
           description: '',
@@ -671,8 +664,8 @@ export default function PhotographyPage() {
         {
           id: '61',
           title: '',
-          url: '/image/61.jpg',
-          thumbnailUrl: '/image/61.jpg',
+          url: '/image/61.webp',
+          thumbnailUrl: '/image/61.webp',
           category: 'nature',
           tags: ['自然', '植物', '叶子', '绿色', '清新'],
           description: '',
@@ -681,8 +674,8 @@ export default function PhotographyPage() {
         {
           id: '62',
           title: '',
-          url: '/image/62.jpg',
-          thumbnailUrl: '/image/62.jpg',
+          url: '/image/62.webp',
+          thumbnailUrl: '/image/62.webp',
           category: 'landscape',
           tags: ['山水', '风景', '自然', '山峰', '云雾'],
           description: '',
@@ -691,8 +684,8 @@ export default function PhotographyPage() {
         {
           id: '63',
           title: '',
-          url: '/image/63.jpg',
-          thumbnailUrl: '/image/63.jpg',
+          url: '/image/63.webp',
+          thumbnailUrl: '/image/63.webp',
           category: 'portrait',
           tags: ['人像', '表情', '特写', '眼神', '情绪'],
           description: '',
@@ -701,8 +694,8 @@ export default function PhotographyPage() {
         {
           id: '64',
           title: '',
-          url: '/image/64.jpg',
-          thumbnailUrl: '/image/64.jpg',
+          url: '/image/64.webp',
+          thumbnailUrl: '/image/64.webp',
           category: 'urban',
           tags: ['城市', '夜景', '灯光', '车流', '都市'],
           description: '',
@@ -711,8 +704,8 @@ export default function PhotographyPage() {
         {
           id: '65',
           title: '',
-          url: '/image/65.jpg',
-          thumbnailUrl: '/image/65.jpg',
+          url: '/image/65.webp',
+          thumbnailUrl: '/image/65.webp',
           category: 'nature',
           tags: ['海洋', '海浪', '海滩', '沙滩', '自然'],
           description: '',
@@ -721,8 +714,8 @@ export default function PhotographyPage() {
         {
           id: '66',
           title: '',
-          url: '/image/66.jpg',
-          thumbnailUrl: '/image/66.jpg',
+          url: '/image/66.webp',
+          thumbnailUrl: '/image/66.webp',
           category: 'landscape',
           tags: ['日落', '天空', '云彩', '风景', '自然'],
           description: '',

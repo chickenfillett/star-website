@@ -118,12 +118,6 @@ export function useEasterEggs() {
     }
   };
 
-  const handleMouseMove = (x: number, y: number) => {
-    if (Math.random() < 0.01) {
-      triggerEasterEgg('cursorTrail');
-    }
-  };
-
   return {
     activeEasterEggs,
     isNightTime,
@@ -134,6 +128,5 @@ export function useEasterEggs() {
     checkPhotoDetailEasterEgg,
     handleLike,
     handleDeviceTilt,
-    handleMouseMove,
   };
 }

@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { PRIVATE_NAV_ITEMS } from '@/constants/navigation';
+import { NAV_ITEMS } from '@/constants/navigation';
 import { ANIMATION } from '@/constants/animation';
 
 export default function MobileNavigation() {
@@ -23,13 +23,12 @@ export default function MobileNavigation() {
     '/photography': '摄影',
     '/opinions': '观点',
     '/about': '关于',
-    '/private': '私域',
   };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 glass-effect-strong border-t border-white/10 safe-area-bottom">
       <div className="flex items-center justify-around h-16">
-        {PRIVATE_NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
           
@@ -45,7 +44,7 @@ export default function MobileNavigation() {
               <motion.div
                 whileTap={{ scale: 0.9 }}
                 transition={ANIMATION.spring.snappy}
-                className={`relative ${item.href === '/private' ? 'w-7 h-7' : 'w-6 h-6'}`}
+                className="relative w-6 h-6"
               >
                 <Icon className={`w-full h-full ${isActive ? 'text-purple-400' : ''}`} />
                 {isActive && (
